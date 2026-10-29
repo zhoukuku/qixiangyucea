@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光伏发电预测看板</title>
+<link rel="stylesheet" href="assets/style.css?v=20261030-12">
+</head>
+<body>
+<div id="app">
+  <!-- 侧边栏 -->
+  <aside class="side" id="side">
+    <div class="logo">
+      <div class="ic">光</div>
+      <div>
+        <div class="nm" id="stName">—</div>
+        <div class="sb" id="stCap">—</div>
+      </div>
+    </div>
+    <div class="divi"></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sp"></div>
+    <div class="ft">
+      数据源<br><b id="srcLine">加载中…</b>
+      <div class="ftbtn"><button class="btn sm" id="btnRefresh">立即刷新</button></div>
+    </div>
+  </aside>
+
+  <!-- 主区 -->
+  <div class="main">
+    <header class="topbar">
+      <button class="burger" id="burger" aria-label="菜单">☰</button>
+      <div class="tb-title" id="pageTitle">运行总览</div>
+      <div class="tools">
+        <span class="chip" id="chipDate">—</span>
+      </div>
+    </header>
+
+    <div id="banner" class="banner" hidden></div>
+    <main id="view" class="view"></main>
+  </div>
+</div>
+<script src="assets/api.js?v=20261030-12"></script>
+<script src="assets/banner.js?v=20261030-12"></script>
+<script src="assets/charts.js?v=20261030-12"></script>
+<script src="assets/app.js?v=20261030-12"></script>
+</body>
+</html>

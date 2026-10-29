@@ -1,0 +1,31 @@
+# ---------- 本地配置（含华为北向账号密码，绝不入库）----------
+# 从 config.example.json 复制出 config.json 再填自己的凭据
+config.json
+config.local.json
+*.local.json
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---------- 运行时缓存与临时产物 ----------
+data/api_cache/
+*.tmp
+*.log
+
+# 调试残留（截图、临时 JSON、页面快照）
+tmp/
+tmp_login.html
+nul
+preview-*.png
+
+# ---------- 工具/编辑器 ----------
+.workbuddy/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

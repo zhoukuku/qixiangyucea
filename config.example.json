@@ -1,0 +1,139 @@
+{
+  "station": {
+    "name": "<YOUR_STATION_NAME>",
+    "short_name": "<SHORT_NAME>",
+    "station_code": "<NE=YOUR_STATION_CODE>",
+    "company_code": "<NE=YOUR_COMPANY_CODE>",
+    "capacity_mwp": 2.105,
+    "grid_date": "2026-09",
+    "location": "中国广东深圳",
+    "owner": "<OWNER>"
+  },
+  "http": {
+    "host": "127.0.0.1",
+    "port": 8766,
+    "timeout_ms": 8000,
+    "open_browser": true
+  },
+  "poll": {
+    "interval_seconds": 300,
+    "stale_after_seconds": 1800,
+    "retry_backoff_seconds": 30
+  },
+  "model": {
+    "k": null,
+    "auto_calibrate": true,
+    "calibrate_days": 30,
+    "pass_line_pct": 85
+  },
+  "finance": {
+    "_说明": "收益换算用的综合电价（元/kWh）。0.5487 = 由华为 10-28 面板反推（1,382.06 元 / 2,518.62 度），用于与华为逐日对账一致",
+    "price_yuan_per_kwh": 0.5487,
+    "currency": "CNY",
+    "note": "综合结算电价 0.5487 元/kWh（自发自用折扣 + 余电上网加权）；按 0.55 整算当日差 3.18 元，故取反推值"
+  },
+  "archive": {
+    "_说明": "旧版看板归档目录（相对 site/）。作为「历史实际数据」合并的最低优先级来源：只在北向 API / 曲线 / 气象仪都没有该日数据时补位，不覆盖实时实测",
+    "enabled": true,
+    "dir": "../legacy/data",
+    "files": [
+      "gen_daily.csv（日电量，单位 MWh）",
+      "irradiance_daily.csv（日辐照，kWh/m²）",
+      "power_5min.json（5 分钟功率，kW）",
+      "inverters.json（分机峰值，kW）"
+    ]
+  },
+  "allocation": {
+    "_说明": "接口拿不到各时段明细时的分摊配置（把当日累计量按历史日内分布摊到各时段）",
+    "enabled": true,
+    "slot_minutes": 60,
+    "mode": "weekday_weekend",
+    "min_samples": 3,
+    "half_life_days": 14
+  },
+  "sources": {
+    "generation": {
+      "label": "实发电量 / 实时功率",
+      "type": "api",
+      "_type说明": "export=解析本地导出的 xlsx；api=调用华为 SmartPVMS 北向 API",
+      "api": {
+        "driver": "fusionsolar",
+        "base_url": "https://cn.fusionsolar.huawei.com/thirdData",
+        "username": "<YOUR_NORTHBOUND_USER>",
+        "password": "<YOUR_NORTHBOUND_PASSWORD>",
+        "station_code": "<NE=YOUR_STATION_CODE>",
+        "dev_type_id": 1,
+        "verify_ssl": true
+      },
+      "export": {
+        "daily_glob": "~/Downloads/电站能量趋势数据_*.xlsx",
+        "power_glob": "~/Downloads/电站能量趋势数据_*.xlsx"
+      }
+    },
+    "irradiance": {
+      "label": "水平面总辐照（Open-Meteo 实况 + 气象仪导出兜底）",
+      "type": "api",
+      "_type说明": "api+driver=open-meteo=Open-Meteo 气象模型实况（推荐，免费无 key）；export=气象仪导出文件；api+driver=fusionsolar=华为电站日数据接口 radiation_intensity",
+      "api": {
+        "driver": "open-meteo",
+        "latitude": 22.55,
+        "longitude": 114.05,
+        "past_days": 45,
+        "timezone": "Asia/Shanghai",
+        "_说明": "免费无 key；past_days=近45天实况（Open-Meteo 上限92），供「按天气分档」的 K 标定凑样本；今天的半日值不入历史对账；导出文件兜底补更早日期"
+      },
+      "export": {
+        "glob": "~/Downloads/2026-*.xls"
+      }
+    },
+    "inverters": {
+      "label": "分逆变器电量",
+      "type": "api",
+      "_type说明": "export=逆变器报表导出文件；api+driver=fusionsolar=华为设备实时接口（day_cap / active_power）",
+      "api": {
+        "driver": "fusionsolar",
+        "base_url": "https://cn.fusionsolar.huawei.com/thirdData",
+        "username": "<YOUR_NORTHBOUND_USER>",
+        "password": "<YOUR_NORTHBOUND_PASSWORD>",
+        "station_code": "<NE=YOUR_STATION_CODE>",
+        "dev_type_id": 1,
+        "verify_ssl": true
+      },
+      "export": {
+        "glob": "~/Downloads/逆变器报表_*.xlsx"
+      }
+    },
+    "forecast": {
+      "label": "未来辐照预报（Open-Meteo）",
+      "type": "api",
+      "_type说明": "api+driver=open-meteo=Open-Meteo 预报辐照（推荐，免费无 key）；none=历史气候学推算",
+      "api": {
+        "driver": "open-meteo",
+        "latitude": 22.55,
+        "longitude": 114.05,
+        "forecast_days": 16,
+        "timezone": "Asia/Shanghai",
+        "_说明": "免费无 key；未来16天逐小时辐照预报按日求和；超出范围回落气候学推算"
+      }
+    },
+    "weather": {
+      "label": "环境气象参数（温度/湿度/风/辐射）",
+      "type": "api",
+      "_type说明": "api+driver=open-meteo=Open-Meteo 参数日线（近7天实况+预报，免费无 key）；seniverse=心知天气私钥（实况逐日积累，免费档无总辐射）；组件温度为 NOCT 经验式估算",
+      "api": {
+        "driver": "open-meteo",
+        "latitude": 22.55,
+        "longitude": 114.05,
+        "past_days": 7,
+        "forecast_days": 7,
+        "timezone": "Asia/Shanghai"
+      },
+      "seniverse": {
+        "public_key": "PdKpod4t0wcSTyICw",
+        "private_key": "SP3grA86eX-AtmTiW",
+        "location": "22.55:114.05",
+        "_说明": "v3 私钥直连（now + hourly）；从接入日起逐日积累进 data/api_cache/weather_daily.json"
+      }
+    }
+  }
+}
